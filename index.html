@@ -232,6 +232,41 @@
   .cell.miss{background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line);}
   .bcol.na .btrack{opacity:.35;} .bcol.na .blbl{opacity:.45;}
 
+  /* ---------- gym / workout ---------- */
+  .day-banner{background:linear-gradient(135deg,var(--ember),#8f3a1f);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;}
+  .day-banner .dtitle{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:24px;color:#fff;line-height:1.05;}
+  .day-banner .dfocus{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.82);margin-top:8px;}
+  .ex-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px;}
+  .ex-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;}
+  .ex-name{font-size:16px;font-weight:600;line-height:1.25;}
+  .ex-name .chev{color:var(--mist);font-size:15px;}
+  .muscle{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--dawn);border:1px solid rgba(245,166,35,.4);border-radius:999px;padding:3px 9px;white-space:nowrap;flex:none;margin-top:1px;}
+  .ex-target{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--mist);margin-top:8px;letter-spacing:.02em;}
+  .ex-note{font-size:12px;color:var(--mist);margin-top:6px;line-height:1.45;opacity:.85;}
+  .ex-last{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--night);margin-top:9px;letter-spacing:.02em;}
+  .sets{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;}
+  .set-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .set-n{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:12px;color:var(--mist);width:16px;text-align:center;flex:none;}
+  .set-in{display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:7px 9px;flex:1;min-width:0;}
+  .set-in input{width:100%;min-width:0;background:transparent;border:none;color:var(--parchment);font-family:"JetBrains Mono",monospace;font-weight:700;font-size:14px;text-align:center;outline:none;}
+  .set-in input::-webkit-outer-spin-button,.set-in input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .set-in .u{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--mist);flex:none;}
+  .set-check{width:32px;height:32px;flex:none;border-radius:8px;border:2px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .set-check svg{width:15px;height:15px;opacity:0;}
+  .set-check.on{background:linear-gradient(150deg,var(--dawn-hi),var(--dawn));border-color:var(--dawn);}
+  .set-check.on svg{opacity:1;}
+  .set-row.done .set-in{border-color:rgba(245,166,35,.4);}
+  .del-set{color:var(--mist);background:transparent;border:none;cursor:pointer;font-size:18px;line-height:1;flex:none;width:22px;opacity:.6;}
+  .add-set{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--dawn);background:transparent;border:none;cursor:pointer;padding:4px 0;text-transform:uppercase;}
+  .rest-card{text-align:center;padding:48px 20px;}
+  .rest-card .ri{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:28px;color:var(--night);}
+  .rest-card .rt{color:var(--mist);font-size:14px;margin-top:12px;line-height:1.6;}
+  .sess-row{display:flex;justify-content:space-between;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line);}
+  .sess-row:last-child{border-bottom:none;}
+  .sess-date{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--mist);flex:none;}
+  .sess-sets{font-family:"JetBrains Mono",monospace;font-size:12px;text-align:right;color:var(--parchment);}
+  .pr{font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:700;letter-spacing:.08em;background:linear-gradient(150deg,var(--dawn-hi),var(--dawn));color:#1a1206;padding:2px 6px;border-radius:5px;vertical-align:middle;}
+
   /* ---------- modal ---------- */
   .overlay{position:fixed;inset:0;background:rgba(8,7,6,0.7);backdrop-filter:blur(3px);z-index:40;display:flex;align-items:flex-end;justify-content:center;}
   .modal{
@@ -345,10 +380,24 @@
     <div class="detail-sub" id="detailSub"></div>
     <div id="detailBody"></div>
   </div>
+
+  <!-- GYM / WORKOUT VIEW -->
+  <div id="view-gym" class="hidden"><div id="gymBody"></div></div>
+
+  <!-- EXERCISE PROGRESSION VIEW -->
+  <div id="view-exercise" class="hidden">
+    <div class="detail-head">
+      <button class="back-btn" data-action="nav" data-view="gym">‹</button>
+      <div class="detail-title" id="exTitle">—</div>
+    </div>
+    <div class="detail-sub" id="exSub"></div>
+    <div id="exBody"></div>
+  </div>
 </div>
 
 <div class="tabs">
   <button class="tab active" id="tab-today" data-action="nav" data-view="today">Today</button>
+  <button class="tab" id="tab-gym" data-action="nav" data-view="gym">Gym</button>
   <button class="tab" id="tab-stats" data-action="nav" data-view="stats">Stats</button>
 </div>
 
@@ -385,9 +434,9 @@ let view='today', editMode=false, lastPop=null, modalState=null, selectedHabit=n
 function load(){
   try{
     const raw=localStorage.getItem(KEY);
-    if(raw){const p=JSON.parse(raw); if(p.habits&&p.log) return p;}
+    if(raw){const p=JSON.parse(raw); if(p.habits&&p.log){ if(!p.workoutLog)p.workoutLog={}; return p; }}
   }catch(e){console.warn('load failed',e);}
-  return {habits:JSON.parse(JSON.stringify(DEFAULTS)), log:{}};
+  return {habits:JSON.parse(JSON.stringify(DEFAULTS)), log:{}, workoutLog:{}};
 }
 function save(){ try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){console.warn('save failed',e);} }
 
@@ -658,16 +707,17 @@ function habitWeekly(h){       // weekly completion % for THIS habit, last 8 wee
     out.push(tot?Math.round(done/tot*100):0);}
   return out;
 }
-function lineChart(series,target){   // SVG trend line for numeric habits
+function lineChart(series,target){   // SVG trend line; dashed target line only when target>0
   const W=320,H=132,pL=6,pR=6,pT=14,pB=18,n=series.length,vals=series.map(p=>p.v);
   const yMax=Math.max(target,...vals,1)*1.15;
   const X=i=>pL+(W-pL-pR)*(n<=1?0.5:i/(n-1));
   const Y=v=>pT+(H-pT-pB)*(1-v/yMax);
   let line=''; series.forEach((p,i)=>line+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)+' ');
-  const base=Y(0).toFixed(1), area=line+`L${X(n-1).toFixed(1)} ${base} L${X(0).toFixed(1)} ${base} Z`, tY=Y(target).toFixed(1);
+  const base=Y(0).toFixed(1), area=line+`L${X(n-1).toFixed(1)} ${base} L${X(0).toFixed(1)} ${base} Z`;
+  let tgt='';
+  if(target>0){ const tY=Y(target).toFixed(1); tgt=`<line x1="${pL}" y1="${tY}" x2="${W-pR}" y2="${tY}" stroke="#6E7EA8" stroke-width="1" stroke-dasharray="4 4"/><text x="${W-pR}" y="${parseFloat(tY)-4}" text-anchor="end" fill="#6E7EA8" font-family="monospace" font-size="9">target</text>`; }
   return `<svg viewBox="0 0 ${W} ${H}" class="lc">
-    <line x1="${pL}" y1="${tY}" x2="${W-pR}" y2="${tY}" stroke="#6E7EA8" stroke-width="1" stroke-dasharray="4 4"/>
-    <text x="${W-pR}" y="${parseFloat(tY)-4}" text-anchor="end" fill="#6E7EA8" font-family="monospace" font-size="9">target</text>
+    ${tgt}
     <path d="${area}" fill="url(#lcg)"/>
     <path d="${line}" fill="none" stroke="#FFCE6B" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
     <defs><linearGradient id="lcg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(245,166,35,.38)"/><stop offset="100%" stop-color="rgba(245,166,35,0)"/></linearGradient></defs>
@@ -734,20 +784,162 @@ function renderDetail(){
 }
 
 /* ============================================================
+   GYM — your 5-day split (from the plan). Mapped to weekdays:
+   Mon=Push, Tue=Pull, Wed=Legs, Fri=Chest/Back/Arms, Sat=Shoulders+Legs.
+   Thu & Sun = rest. Logging any set auto-ticks the Gym habit.
+   ============================================================ */
+const WORKOUTS={
+  1:{title:"Push",focus:"Chest · Shoulders · Triceps",ex:[
+    {n:"Incline DB Press",sets:"3–4",reps:"8–10",tempo:"3:1:2:1",m:"Chest",note:"Lower slowly to upper chest, elbows slightly tucked, smooth press."},
+    {n:"Chest Press Machine",sets:"3",reps:"10–12",tempo:"3:1:2:1",m:"Chest",note:"Shoulders back, grip slightly wide, squeeze chest at the top."},
+    {n:"Machine Shoulder Press",sets:"3",reps:"8–10",tempo:"3:1:2:1",m:"Shoulders",note:"Lower to chin height, keep core braced, press with control."},
+    {n:"DB Lateral Raises",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Shoulders",note:"Lead with elbows, lift to shoulder height, don't swing."},
+    {n:"Cable Triceps Pushdown",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Triceps",note:"Keep elbows locked in, extend fully, pause at bottom."},
+    {n:"Overhead Rope Extension",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Triceps",note:"Stretch behind head, extend straight up, keep back still."}
+  ]},
+  2:{title:"Pull",focus:"Back · Rear Delts · Biceps",ex:[
+    {n:"Lat Pulldown",sets:"3–4",reps:"8–10",tempo:"3:1:2:1",m:"Back",note:"Pull elbows down to ribs, chest tall, avoid using momentum."},
+    {n:"Chest-Supported Row",sets:"3",reps:"8–10",tempo:"3:1:2:1",m:"Back",note:"Pull to lower chest, squeeze shoulder blades, stay supported."},
+    {n:"Seated Row",sets:"3",reps:"10–12",tempo:"3:1:2:1",m:"Back",note:"Sit tall, pull the handle to belly button, control the return."},
+    {n:"Rear Delt Fly",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Rear Delts",note:"Move arms wide, feel rear delts, avoid shrugging shoulders."},
+    {n:"Dumbbell Curls",sets:"3",reps:"10–12",tempo:"3:1:2:1",m:"Biceps",note:"Keep elbows by your sides, curl slowly, palms up, full squeeze."},
+    {n:"Incline DB Curls",sets:"2–3",reps:"10–12",tempo:"3:1:2:1",m:"Biceps",note:"Let arms stretch fully at bottom, curl slowly, no swinging."}
+  ]},
+  3:{title:"Legs",focus:"Quads · Calves",ex:[
+    {n:"Back Squat or Hack Squat",sets:"3–4",reps:"6–8",tempo:"3:1:2:1",m:"Quads",note:"Brace core, squat under control, push through the whole foot."},
+    {n:"Weighted Squats",sets:"3",reps:"8–12",tempo:"3:1:2:1",m:"Quads",note:"Brace, squat to depth, drive up through mid-foot."},
+    {n:"Leg Extension",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Quads",note:"Lift with quads, pause at top, lower slowly."},
+    {n:"Calf Raise",sets:"3–4",reps:"12–15",tempo:"3:1:2:1",m:"Calves",note:"Full stretch, push through big toe, slow descent."}
+  ]},
+  5:{title:"Chest · Back · Arms",focus:"Chest · Back · Arms",ex:[
+    {n:"Flat DB Press",sets:"3–4",reps:"6–8",tempo:"3:1:2:1",m:"Chest",note:"Lower smoothly; elbows tucked; press evenly."},
+    {n:"Cable Chest Fly",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Chest",note:"Slight elbow bend, hands meet at chest height."},
+    {n:"Lat Pulldown (Neutral Grip)",sets:"3",reps:"10–12",tempo:"3:1:2:1",m:"Back",note:"Pull elbows down and forward; chest stays up."},
+    {n:"Seated Row",sets:"3",reps:"10–12",tempo:"3:1:2:1",m:"Back",note:"Pull to stomach, squeeze mid-back, slow return."},
+    {n:"Cable Bicep Curls",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Biceps",note:"Keep elbows still, curl smoothly, full squeeze."},
+    {n:"Tricep Dips / Dip Machine",sets:"3",reps:"8–10",tempo:"3:1:2:1",m:"Triceps",note:"Lower to 90°, push up under control."}
+  ]},
+  6:{title:"Shoulders + Legs",focus:"Shoulders · Quads · Hamstrings",ex:[
+    {n:"DB Shoulder Press",sets:"3–4",reps:"6–8",tempo:"3:1:2:1",m:"Shoulders",note:"Lower to chin height, don't lock elbows, stay braced."},
+    {n:"Lateral Raises",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Shoulders",note:"Lift to shoulder height, soft elbows, slow lower."},
+    {n:"Front Squat / Hack Squat",sets:"3",reps:"6–8",tempo:"3:1:2:1",m:"Quads",note:"Keep torso upright, drive knees forward comfortably."},
+    {n:"Hamstring Curl",sets:"3",reps:"10–12",tempo:"3:1:2:1",m:"Hamstrings",note:"Curl smoothly, squeeze hard, control stretch."},
+    {n:"Leg Extension",sets:"3",reps:"12–15",tempo:"3:1:2:1",m:"Quads",note:"Lock quads at top, pause, lower slowly."}
+  ]}
+};
+let selectedExercise=null;
+const EMPTY2='<div class="empty-note">Log this lift once and your<br>progression shows up here.</div>';
+
+function workoutFor(d){ return WORKOUTS[d.getDay()]||null; }
+function setsDefault(s){ const m=String(s).match(/\d+/); return m?parseInt(m[0],10):3; }
+function exSets(dk,name){ const d=state.workoutLog[dk]; return (d&&d[name])?d[name]:null; }
+function setExSets(dk,name,arr){ if(!state.workoutLog[dk])state.workoutLog[dk]={}; state.workoutLog[dk][name]=arr; save(); }
+function e1rm(w,r){ return w*(1+(r||0)/30); }                      // Epley estimated 1-rep max
+function lastSession(name,beforeDk){     // most recent earlier day with real sets for this lift
+  const ds=Object.keys(state.workoutLog).filter(dk=>dk<beforeDk && (state.workoutLog[dk][name]||[]).some(s=>s.done&&(parseFloat(s.w)||0)>0)).sort();
+  if(!ds.length)return null; const dk=ds[ds.length-1];
+  return {dk, sets:state.workoutLog[dk][name].filter(s=>s.done&&(parseFloat(s.w)||0)>0)};
+}
+function gatherSets(name){               // read a lift's set rows straight from the DOM
+  return [...document.querySelectorAll('.set-row[data-ex="'+name+'"]')].map(row=>{
+    const wv=row.querySelector('input.w').value, rv=row.querySelector('input.r').value;
+    return { w: wv===''?'':parseFloat(wv), r: rv===''?'':parseInt(rv,10), done: row.querySelector('.set-check').classList.contains('on') };
+  });
+}
+function autoTickGym(){                   // any logged set on a training day ticks the Gym habit
+  const day=state.workoutLog[tKey()]||{};
+  if(Object.values(day).some(arr=>arr.some(s=>s.done&&(parseFloat(s.w)||0)>0))) setVal('gym',tKey(),true);
+}
+function renderGym(){
+  const w=workoutFor(today()), root=document.getElementById('gymBody');
+  if(!w){ root.innerHTML='<div class="rest-card"><div class="ri">Rest day</div><div class="rt">Recover and grow.<br>Steps · hydration · protein · sleep.</div></div>'; return; }
+  root.innerHTML='<div class="day-banner"><div class="dtitle">'+w.title+'</div><div class="dfocus">'+w.focus+'</div></div>'+w.ex.map(exerciseCard).join('');
+}
+function exerciseCard(e){
+  const dk=tKey(); let rows=exSets(dk,e.n); const last=lastSession(e.n,dk);
+  if(!rows){ const cnt=setsDefault(e.sets); rows=[]; for(let i=0;i<cnt;i++){ const ls=last&&last.sets[i]; rows.push({w:ls?ls.w:'',r:ls?ls.r:'',done:false}); } }
+  const lastStr=last?last.sets.map(s=>fmt(s.w)+'×'+(s.r||0)).join(' · '):'—';
+  const setsHtml=rows.map((s,i)=>`
+    <div class="set-row ${s.done?'done':''}" data-ex="${e.n}">
+      <span class="set-n">${i+1}</span>
+      <span class="set-in"><input type="number" inputmode="decimal" class="w" data-act="set-w" data-ex="${e.n}" placeholder="0" value="${(s.w!==''&&s.w!=null)?s.w:''}"><span class="u">lb</span></span>
+      <span class="set-in"><input type="number" inputmode="numeric" class="r" data-act="set-r" data-ex="${e.n}" placeholder="0" value="${(s.r!==''&&s.r!=null)?s.r:''}"><span class="u">reps</span></span>
+      <button class="set-check ${s.done?'on':''}" data-action="set-done" data-ex="${e.n}" data-i="${i}">${CHECK_SVG}</button>
+      <button class="del-set" data-action="set-del" data-ex="${e.n}" data-i="${i}">×</button>
+    </div>`).join('');
+  return `<div class="ex-card">
+    <div class="ex-head" data-action="open-ex" data-ex="${e.n}">
+      <div class="ex-name">${e.n} <span class="chev">›</span></div>
+      <span class="muscle">${e.m}</span>
+    </div>
+    <div class="ex-target">${e.sets} sets · ${e.reps} reps · tempo ${e.tempo}</div>
+    <div class="ex-note">${e.note}</div>
+    <div class="ex-last">Last time: ${lastStr}</div>
+    <div class="sets">${setsHtml}<button class="add-set" data-action="set-add" data-ex="${e.n}">+ add set</button></div>
+  </div>`;
+}
+let exMetric='weight';
+function renderExercise(){
+  const name=selectedExercise; let meta=null;
+  Object.values(WORKOUTS).forEach(w=>w.ex.forEach(e=>{ if(e.n===name)meta=e; }));
+  document.getElementById('exTitle').textContent=name||'—';
+  document.getElementById('exSub').textContent=meta?(meta.m+' · '+meta.sets+' sets · '+meta.reps+' reps'):'';
+  const body=document.getElementById('exBody');
+  const ds=Object.keys(state.workoutLog).filter(dk=>(state.workoutLog[dk][name]||[]).some(s=>s.done&&(parseFloat(s.w)||0)>0)).sort();
+  if(!ds.length){ body.innerHTML='<div class="tiles"><div class="tile"><div class="tile-num">—</div><div class="tile-lbl">Best lb</div></div><div class="tile"><div class="tile-num">—</div><div class="tile-lbl">Est 1RM</div></div><div class="tile"><div class="tile-num">0</div><div class="tile-lbl">Sessions</div></div></div>'+EMPTY2; return; }
+  const sessions=ds.map(dk=>{ const sets=state.workoutLog[dk][name].filter(s=>s.done&&(parseFloat(s.w)||0)>0).map(s=>({w:parseFloat(s.w),r:parseInt(s.r)||0}));
+    return {dk,sets,topW:Math.max(...sets.map(s=>s.w)),best1:Math.max(...sets.map(s=>e1rm(s.w,s.r))),vol:sets.reduce((a,s)=>a+s.w*s.r,0)}; });
+  // flag personal records (a session that beats every earlier top-set weight)
+  let runMax=-Infinity; sessions.forEach(s=>{ s.pr=s.topW>runMax; if(s.topW>runMax)runMax=s.topW; });
+  const bestW=Math.max(...sessions.map(s=>s.topW)), best1=Math.max(...sessions.map(s=>s.best1)), lastS=sessions[sessions.length-1];
+
+  const METRICS={ weight:{lbl:'Top-set weight',f:s=>s.topW}, e1rm:{lbl:'Estimated 1-rep max',f:s=>Math.round(s.best1*10)/10}, volume:{lbl:'Total volume',f:s=>s.vol} };
+  const M=METRICS[exMetric];
+  const series=sessions.map(s=>({v:M.f(s)}));
+
+  let html='<div class="tiles">'+
+    '<div class="tile"><div class="tile-num">'+fmt(bestW)+'</div><div class="tile-lbl">Best lb</div></div>'+
+    '<div class="tile"><div class="tile-num">'+fmt(Math.round(best1*10)/10)+'</div><div class="tile-lbl">Est 1RM</div></div>'+
+    '<div class="tile"><div class="tile-num">'+sessions.length+'</div><div class="tile-lbl">Sessions</div></div></div>';
+  html+='<div class="seg" style="margin-bottom:12px">'+
+    '<button class="'+(exMetric==='weight'?'sel':'')+'" data-action="ex-metric" data-m="weight">Weight</button>'+
+    '<button class="'+(exMetric==='e1rm'?'sel':'')+'" data-action="ex-metric" data-m="e1rm">Est 1RM</button>'+
+    '<button class="'+(exMetric==='volume'?'sel':'')+'" data-action="ex-metric" data-m="volume">Volume</button></div>';
+  html+='<div class="chain-card">'+lineChart(series,0)+'<div class="chart-cap">'+M.lbl+' · '+fmt(M.f(sessions[0]))+' lb → '+fmt(M.f(lastS))+' lb</div></div>';
+  html+='<div class="panel-title">Recent sessions</div><div class="chain-card">';
+  const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  sessions.slice(-10).reverse().forEach(s=>{ const d=new Date(s.dk+'T12:00:00');
+    html+='<div class="sess-row"><span class="sess-date">'+DOW[d.getDay()]+' '+MON[d.getMonth()]+' '+d.getDate()+'</span><span class="sess-sets">'+(s.pr?'<span class="pr">PR</span> ':'')+s.sets.map(x=>fmt(x.w)+'×'+x.r).join(' · ')+'</span></div>'; });
+  html+='</div>';
+  body.innerHTML=html;
+}
+
+/* ============================================================
    3. INTERACTION
    ============================================================ */
+document.body.addEventListener('change',e=>{
+  const t=e.target;
+  if(t&&t.dataset&&(t.dataset.act==='set-w'||t.dataset.act==='set-r')){
+    const ex=t.dataset.ex; setExSets(tKey(),ex,gatherSets(ex)); autoTickGym();
+  }
+});
 document.body.addEventListener('click',e=>{
   const t=e.target.closest('[data-action]'); if(!t)return;
   const a=t.dataset.action, id=t.dataset.id;
 
   if(a==='nav'){ setView(t.dataset.view); return; }
   if(a==='open-habit'){ selectedHabit=id; setView('detail'); return; }
+  if(a==='open-ex'){ selectedExercise=t.dataset.ex; setView('exercise'); return; }
+  if(a==='ex-metric'){ exMetric=t.dataset.m; renderExercise(); return; }
+  if(a==='set-done'){ const ex=t.dataset.ex,i=+t.dataset.i; const rows=gatherSets(ex); if(rows[i])rows[i].done=!rows[i].done; setExSets(tKey(),ex,rows); autoTickGym(); renderGym(); return; }
+  if(a==='set-add'){ const ex=t.dataset.ex; const rows=gatherSets(ex); rows.push({w:'',r:'',done:false}); setExSets(tKey(),ex,rows); renderGym(); return; }
+  if(a==='set-del'){ const ex=t.dataset.ex,i=+t.dataset.i; const rows=gatherSets(ex); rows.splice(i,1); setExSets(tKey(),ex,rows); autoTickGym(); renderGym(); return; }
   if(a==='toggle-edit'){ editMode=!editMode; render(); return; }
   if(a==='open-add'){ openModal(); return; }
   if(a==='close-modal'){ closeModal(); return; }
   if(a==='save-habit'){ saveHabit(); return; }
   if(a==='delete-habit'){ if(confirm('Delete this habit? Its history stays but it disappears from your list.')){ state.habits=state.habits.filter(h=>h.id!==id); save(); render(); } return; }
-  if(a==='reset-data'){ if(confirm('Erase ALL habits and history and start fresh? This cannot be undone.')){ state={habits:JSON.parse(JSON.stringify(DEFAULTS)),log:{}}; save(); editMode=false; render(); } return; }
+  if(a==='reset-data'){ if(confirm('Erase ALL habits and history and start fresh? This cannot be undone.')){ state={habits:JSON.parse(JSON.stringify(DEFAULTS)),log:{},workoutLog:{}}; save(); editMode=false; render(); } return; }
 
   if(editMode) return; // don't change values while editing
 
@@ -786,13 +978,15 @@ function inlineEdit(el,id){
 
 function setView(v){
   view=v;
-  document.getElementById('view-today').classList.toggle('hidden',v!=='today');
-  document.getElementById('view-stats').classList.toggle('hidden',v!=='stats');
-  document.getElementById('view-detail').classList.toggle('hidden',v!=='detail');
+  ['today','gym','stats','detail','exercise'].forEach(x=>document.getElementById('view-'+x).classList.toggle('hidden',v!==x));
   document.getElementById('tab-today').classList.toggle('active',v==='today');
+  document.getElementById('tab-gym').classList.toggle('active',v==='gym');
   document.getElementById('tab-stats').classList.toggle('active',v==='stats');
+  document.getElementById('editBtn').style.display = v==='today'?'':'none';
   if(v==='stats') renderStats();
+  if(v==='gym'){ renderGym(); window.scrollTo(0,0); }
   if(v==='detail'){ renderDetail(); window.scrollTo(0,0); }
+  if(v==='exercise'){ renderExercise(); window.scrollTo(0,0); }
 }
 
 /* ---------- add-habit modal ---------- */
