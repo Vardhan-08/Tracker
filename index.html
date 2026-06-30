@@ -267,6 +267,18 @@
   .sess-sets{font-family:"JetBrains Mono",monospace;font-size:12px;text-align:right;color:var(--parchment);}
   .pr{font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:700;letter-spacing:.08em;background:linear-gradient(150deg,var(--dawn-hi),var(--dawn));color:#1a1206;padding:2px 6px;border-radius:5px;vertical-align:middle;}
 
+  /* ---------- time habit ---------- */
+  .timew{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none;}
+  .timein{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:15px;background:var(--bg);color:var(--parchment);border:1px solid var(--line);border-radius:9px;padding:8px 10px;outline:none;}
+  .timein::-webkit-calendar-picker-indicator{filter:invert(70%) sepia(40%) saturate(600%) hue-rotate(345deg);cursor:pointer;}
+  .habit.done .timein{border-color:var(--dawn);}
+  .habit.late .timein{border-color:rgba(229,104,59,.55);}
+  .habit.late{background:linear-gradient(90deg,rgba(229,104,59,0.08),var(--surface) 60%);border-color:rgba(229,104,59,0.35);}
+  .devlbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.03em;}
+  .devlbl.goal{color:var(--mist);}
+  .devlbl.ok{color:var(--dawn-hi);}
+  .devlbl.late{color:var(--ember);}
+
   /* ---------- modal ---------- */
   .overlay{position:fixed;inset:0;background:rgba(8,7,6,0.7);backdrop-filter:blur(3px);z-index:40;display:flex;align-items:flex-end;justify-content:center;}
   .modal{
@@ -411,7 +423,7 @@
       days 'daily' OR an array of weekdays (0=Sun ... 6=Sat).
    ============================================================ */
 const DEFAULTS = [
-  {id:'wake',  name:'Wake by 5:30',      note:'Up before the alarm wins', type:'check', part:'dawn', days:'daily'},
+  {id:'wake',  name:'Wake by 5:30',      note:'Up before the alarm wins', type:'time', goal:'05:30', wrap:false, part:'dawn', days:'daily'},
   {id:'nophone',name:'No phone first 2 hrs',note:'Let the mind boot up slowly', type:'check', part:'dawn', days:'daily'},
   {id:'walk',  name:'Morning walk',       note:'', type:'check', part:'dawn', days:'daily'},
 
@@ -424,17 +436,24 @@ const DEFAULTS = [
 
   {id:'noeat', name:'No food/drink after 9pm', note:'', type:'check', part:'night', days:'daily'},
   {id:'noscreen',name:'No screen after 10pm',  note:'', type:'check', part:'night', days:'daily'},
-  {id:'sleep', name:'Sleep by 10:30',          note:'', type:'check', part:'night', days:'daily'},
+  {id:'sleep', name:'Sleep by 10:30',          note:'', type:'time', goal:'22:30', wrap:true, part:'night', days:'daily'},
 ];
 
 const KEY='dd_v1';
 let state = load();
 let view='today', editMode=false, lastPop=null, modalState=null, selectedHabit=null;
 
+function migrate(p){
+  (p.habits||[]).forEach(h=>{
+    if(h.id==='wake' && h.type!=='time'){ h.type='time'; h.goal='05:30'; h.wrap=false; }
+    if(h.id==='sleep' && h.type!=='time'){ h.type='time'; h.goal='22:30'; h.wrap=true; }
+  });
+  return p;
+}
 function load(){
   try{
     const raw=localStorage.getItem(KEY);
-    if(raw){const p=JSON.parse(raw); if(p.habits&&p.log){ if(!p.workoutLog)p.workoutLog={}; return p; }}
+    if(raw){const p=JSON.parse(raw); if(p.habits&&p.log){ if(!p.workoutLog)p.workoutLog={}; return migrate(p); }}
   }catch(e){console.warn('load failed',e);}
   return {habits:JSON.parse(JSON.stringify(DEFAULTS)), log:{}, workoutLog:{}};
 }
@@ -451,7 +470,16 @@ function habit(id){return state.habits.find(h=>h.id===id);}
 function isScheduled(h,d){return h.days==='daily' || (Array.isArray(h.days)&&h.days.includes(d.getDay()));}
 function valFor(id,dk){const day=state.log[dk]; return day?day[id]:undefined;}
 function setVal(id,dk,v){ if(!state.log[dk])state.log[dk]={}; state.log[dk][id]=v; save(); }
-function isComplete(h,v){ return h.type==='check' ? v===true : (Number(v)||0) >= h.target; }
+function timeToMin(t){ if(typeof t!=='string'||t.indexOf(':')<0)return null; const p=t.split(':'); return (+p[0])*60+(+p[1]); }
+function devMinutes(h,v){ let m=timeToMin(v); if(m==null)return null; const g=timeToMin(h.goal); if(h.wrap && m < g-720) m+=1440; return m-g; }   // + = late, <=0 = on time/early
+function isComplete(h,v){
+  if(h.type==='check') return v===true;
+  if(h.type==='time'){ const d=devMinutes(h,v); return d!=null && d<=0; }
+  return (Number(v)||0) >= h.target;
+}
+function devLabel(d){ if(d===0)return 'on time'; const a=Math.abs(d); const s=a>=60?(Math.floor(a/60)+'h'+(a%60?' '+(a%60)+'m':'')):(a+' min'); return s+(d>0?' late':' early'); }
+function minToTime12(min){ min=((Math.round(min))%1440+1440)%1440; let h=Math.floor(min/60),m=min%60,ap=h<12?'AM':'PM',hh=h%12||12; return hh+':'+String(m).padStart(2,'0')+' '+ap; }
+function minToTimeShort(min){ min=((Math.round(min))%1440+1440)%1440; let h=Math.floor(min/60),m=min%60,ap=h<12?'a':'p',hh=h%12||12; return hh+':'+String(m).padStart(2,'0')+ap; }
 
 /* ---------- day completion + streaks ---------- */
 function dayStats(dk){
@@ -577,7 +605,10 @@ function renderList(){
 function habitRow(h){
   const v=valFor(h.id,tKey());
   const done=isComplete(h,v);
-  const row=document.createElement('div'); row.className='habit'+(done&&!editMode?' done':'');
+  const logged=(typeof v==='string'&&v);
+  let extra = (done&&!editMode)?' done':'';
+  if(h.type==='time' && !editMode && logged && !done) extra=' late';
+  const row=document.createElement('div'); row.className='habit'+extra;
   let html=`<div class="h-main"><div class="h-name">${h.name}</div>${h.note?`<div class="h-note">${h.note}</div>`:''}</div>`;
 
   if(editMode){
@@ -587,6 +618,14 @@ function habitRow(h){
   if(h.type==='check'){
     row.dataset.action='toggle-check'; row.dataset.id=h.id;
     html+=`<div class="check ${v===true?'on':''} ${lastPop===h.id?'pop':''}">${CHECK_SVG}</div>`;
+  } else if(h.type==='time'){
+    const g=timeToMin(h.goal);
+    const dev= logged?devMinutes(h,v):null;
+    const sub = logged ? `<div class="devlbl ${dev<=0?'ok':'late'}">${devLabel(dev)}</div>` : `<div class="devlbl goal">by ${minToTime12(g)}</div>`;
+    html+=`<div class="timew">
+      <input type="time" class="timein" data-act="time" data-id="${h.id}" value="${logged?v:''}">
+      ${sub}
+    </div>`;
   } else {
     const cur=Number(v)||0;
     const pct=Math.min(100, h.target? cur/h.target*100 : 0);
@@ -754,8 +793,10 @@ function renderDetail(){
   if(!h){setView('stats');return;}
   document.getElementById('detailTitle').textContent=h.name;
   const freq=h.days==='daily'?'Every day':'On '+h.days.map(d=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', ');
-  const kind=h.type==='number'?`Target ${fmt(h.target)}${h.unit?(' '+h.unit):''}`:'Tick to complete';
+  const kind=h.type==='time'?('Goal '+minToTime12(timeToMin(h.goal))):h.type==='number'?`Target ${fmt(h.target)}${h.unit?(' '+h.unit):''}`:'Tick to complete';
   document.getElementById('detailSub').textContent=kind+' · '+freq;
+
+  if(h.type==='time'){ renderTimeDetail(h, document.getElementById('detailBody')); return; }
 
   let html=`<div class="tiles">
     <div class="tile"><div class="tile-num">${habitStreak(h)}</div><div class="tile-lbl">Streak</div></div>
@@ -914,14 +955,61 @@ function renderExercise(){
   body.innerHTML=html;
 }
 
+/* ---------- time-habit detail (wake / sleep deviation) ---------- */
+function tile(num,lbl){ return '<div class="tile"><div class="tile-num">'+num+'</div><div class="tile-lbl">'+lbl+'</div></div>'; }
+function devChart(arr,labels){     // diverging bars around the goal baseline (up=later, down=earlier)
+  const W=320,H=labels?150:140,mid=Math.round(H/2),pad=22,n=arr.length;
+  const maxAbs=Math.max(30,...arr.filter(d=>d.has).map(d=>Math.abs(d.dev)));
+  const slot=(W-4)/n; let bars='';
+  arr.forEach((d,i)=>{ const cx=2+i*slot+slot/2;
+    if(d.has){
+      const h=Math.min(1,Math.abs(d.dev)/maxAbs)*(mid-pad);
+      let y,hh,c;
+      if(d.dev>0){y=mid-h;hh=h;c='#E5683B';}          // late  -> up, ember
+      else if(d.dev<0){y=mid;hh=h;c='#F5A623';}        // early -> down, amber
+      else{y=mid-2;hh=4;c='#7FB069';}                  // on time -> green tick
+      const bw=Math.max(2.5,slot-(labels?7:1.6));
+      bars+=`<rect x="${(cx-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2.5,hh).toFixed(1)}" rx="1.5" fill="${c}"/>`;
+    }
+    if(labels) bars+=`<text x="${cx.toFixed(1)}" y="${H-3}" text-anchor="middle" fill="#8A8578" font-family="monospace" font-size="9">${labels[i]}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" class="lc">
+    <line x1="2" y1="${mid}" x2="${W-2}" y2="${mid}" stroke="#6E7EA8" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="4" y="11" fill="#6E7EA8" font-family="monospace" font-size="8.5">LATER</text>
+    <text x="4" y="${H-(labels?16:6)}" fill="#6E7EA8" font-family="monospace" font-size="8.5">EARLIER</text>
+    ${bars}
+  </svg>`;
+}
+function renderTimeDetail(h,body){
+  const g=timeToMin(h.goal);
+  const dks=Object.keys(state.log).filter(dk=>typeof valFor(h.id,dk)==='string' && valFor(h.id,dk));
+  if(!dks.length){ body.innerHTML='<div class="tiles">'+tile('—','Avg time')+tile('—','On-time')+tile('0','On-time streak')+'</div>'+EMPTY; return; }
+  const devs=dks.map(dk=>devMinutes(h,valFor(h.id,dk)));
+  const mins=dks.map(dk=>{ let m=timeToMin(valFor(h.id,dk)); if(h.wrap&&m<g-720)m+=1440; return m; });
+  const avgMin=mins.reduce((a,b)=>a+b,0)/mins.length;
+  const rate=Math.round(devs.filter(d=>d<=0).length/devs.length*100);
+  const avgDev=Math.round(devs.reduce((a,b)=>a+b,0)/devs.length);
+  // 30-day deviation series
+  const series=[]; for(let i=29;i>=0;i--){ const v=valFor(h.id,key(addDays(today(),-i))); const has=typeof v==='string'&&!!v; series.push({has,dev:has?devMinutes(h,v):0}); }
+  // weekday average deviation (8 weeks)
+  const ws=[0,0,0,0,0,0,0],wc=[0,0,0,0,0,0,0];
+  for(let i=56;i>=1;i--){ const d=addDays(today(),-i),v=valFor(h.id,key(d)); if(typeof v==='string'&&v){ ws[d.getDay()]+=devMinutes(h,v); wc[d.getDay()]++; } }
+  const wdev=ws.map((s,i)=>({has:wc[i]>0,dev:wc[i]?Math.round(s/wc[i]):0}));
+  const avgDevTxt = avgDev===0?'right on time on average':('on average '+devLabel(avgDev));
+  let html='<div class="tiles">'+tile(minToTimeShort(avgMin),'Avg time')+tile(rate+'%','On-time')+tile(habitStreak(h),'On-time streak')+'</div>';
+  html+='<div class="panel-title">How early or late · 30 days</div><div class="chain-card">'+devChart(series,null)+'<div class="chart-cap">'+avgDevTxt+' · goal '+minToTime12(g)+'</div></div>';
+  html+='<div class="panel-title">By weekday</div><div class="chain-card">'+devChart(wdev,['S','M','T','W','T','F','S'])+'<div class="chart-cap">average minutes early / late per weekday</div></div>';
+  html+='<div class="panel-title">On-time chain · 30 days</div><div class="chain-card">'+habitGridHTML(h)+'</div>';
+  body.innerHTML=html;
+}
+
 /* ============================================================
    3. INTERACTION
    ============================================================ */
 document.body.addEventListener('change',e=>{
-  const t=e.target;
-  if(t&&t.dataset&&(t.dataset.act==='set-w'||t.dataset.act==='set-r')){
-    const ex=t.dataset.ex; setExSets(tKey(),ex,gatherSets(ex)); autoTickGym();
-  }
+  const t=e.target; if(!t||!t.dataset)return;
+  if(t.dataset.act==='set-w'||t.dataset.act==='set-r'){ setExSets(tKey(),t.dataset.ex,gatherSets(t.dataset.ex)); autoTickGym(); return; }
+  if(t.dataset.act==='time'){ commit(t.dataset.id, t.value); return; }
 });
 document.body.addEventListener('click',e=>{
   const t=e.target.closest('[data-action]'); if(!t)return;
@@ -941,18 +1029,18 @@ document.body.addEventListener('click',e=>{
   if(a==='delete-habit'){ if(confirm('Delete this habit? Its history stays but it disappears from your list.')){ state.habits=state.habits.filter(h=>h.id!==id); save(); render(); } return; }
   if(a==='reset-data'){ if(confirm('Erase ALL habits and history and start fresh? This cannot be undone.')){ state={habits:JSON.parse(JSON.stringify(DEFAULTS)),log:{},workoutLog:{}}; save(); editMode=false; render(); } return; }
 
+  // modal-internal toggles — handle BEFORE the edit guard (the Add-habit modal is open while editMode is true)
+  if(a==='m-type'){ syncModalInputs(); modalState.type=t.dataset.v; renderModal(); return; }
+  if(a==='m-part'){ syncModalInputs(); modalState.part=t.dataset.v; renderModal(); return; }
+  if(a==='m-freq'){ syncModalInputs(); modalState.freq=t.dataset.v; if(modalState.freq==='custom'&&!modalState.days.length)modalState.days=[1,2,3,4,5,6]; renderModal(); return; }
+  if(a==='m-day'){ syncModalInputs(); const n=+t.dataset.v; const i=modalState.days.indexOf(n); if(i<0)modalState.days.push(n); else modalState.days.splice(i,1); renderModal(); return; }
+
   if(editMode) return; // don't change values while editing
 
   if(a==='toggle-check'){ const h=habit(id); const cur=valFor(id,tKey())===true; commit(id, !cur); }
   if(a==='num-dec'){ const h=habit(id); const cur=Number(valFor(id,tKey()))||0; commit(id, Math.max(0, round(cur-h.step))); }
   if(a==='num-inc'){ const h=habit(id); const cur=Number(valFor(id,tKey()))||0; commit(id, round(cur+h.step)); }
   if(a==='num-edit'){ inlineEdit(t,id); }
-
-  // modal-internal toggles
-  if(a==='m-type'){ modalState.type=t.dataset.v; renderModal(); }
-  if(a==='m-part'){ modalState.part=t.dataset.v; renderModal(); }
-  if(a==='m-freq'){ modalState.freq=t.dataset.v; if(modalState.freq==='custom'&&!modalState.days.length)modalState.days=[1,2,3,4,5,6]; renderModal(); }
-  if(a==='m-day'){ const n=+t.dataset.v; const i=modalState.days.indexOf(n); if(i<0)modalState.days.push(n); else modalState.days.splice(i,1); renderModal(); }
 });
 
 const round=v=>Math.round(v*100)/100;
@@ -999,6 +1087,13 @@ function openModal(){
   setTimeout(()=>{const n=document.getElementById('m-name'); if(n)n.focus();},50);
 }
 function closeModal(){ const o=document.getElementById('ov'); if(o)o.remove(); modalState=null; }
+function syncModalInputs(){
+  if(!modalState)return;
+  const n=document.getElementById('m-name'); if(n)modalState.name=n.value;
+  const tg=document.getElementById('m-target'); if(tg)modalState.target=tg.value;
+  const u=document.getElementById('m-unit'); if(u)modalState.unit=u.value;
+  const st=document.getElementById('m-step'); if(st)modalState.step=st.value;
+}
 function renderModal(){
   const m=document.getElementById('modal'); if(!m)return;
   const ms=modalState;
